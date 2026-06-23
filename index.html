@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTA RACER – Urban Rush</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     ÉCRANS MENUS
+═══════════════════════════════════════════════ -->
+
+<!-- MENU PRINCIPAL -->
+<div id="screen-main-menu" class="screen active">
+  <div class="menu-bg-anim"></div>
+  <div class="scanlines"></div>
+  <div class="menu-content">
+    <div class="logo-block">
+      <span class="logo-gta">URBAN</span>
+      <span class="logo-racer">RUSH</span>
+      <span class="logo-sub">CITY RACING</span>
+    </div>
+    <nav class="main-nav">
+      <button class="btn-menu btn-primary" onclick="showScreen('screen-car-select')">
+        <span class="btn-icon">▶</span> JOUER
+      </button>
+      <button class="btn-menu" onclick="showScreen('screen-leaderboard')">
+        <span class="btn-icon">🏆</span> CLASSEMENT
+      </button>
+      <button class="btn-menu" onclick="showScreen('screen-stats')">
+        <span class="btn-icon">📊</span> STATISTIQUES
+      </button>
+      <button class="btn-menu" onclick="showScreen('screen-settings')">
+        <span class="btn-icon">⚙</span> PARAMÈTRES
+      </button>
+    </nav>
+    <div class="menu-footer">
+      <span class="player-xp-bar-label">Niveau <span id="menu-level">1</span> – <span id="menu-xp">0</span> XP</span>
+      <div class="xp-bar-wrap"><div class="xp-bar-fill" id="menu-xp-fill"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SÉLECTION VOITURE -->
+<div id="screen-car-select" class="screen">
+  <div class="menu-bg-anim"></div>
+  <div class="scanlines"></div>
+  <div class="menu-content wide">
+    <h2 class="screen-title">CHOISIR UN VÉHICULE</h2>
+    <div class="car-grid" id="car-grid"></div>
+    <div class="car-preview-block">
+      <canvas id="car-preview-canvas" width="320" height="180"></canvas>
+      <div class="car-stats" id="car-stats"></div>
+    </div>
+    <div class="screen-nav">
+      <button class="btn-menu" onclick="showScreen('screen-main-menu')">← RETOUR</button>
+      <button class="btn-menu btn-primary" id="btn-car-ok" onclick="showScreen('screen-mode-select')">SUIVANT →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SÉLECTION MODE -->
+<div id="screen-mode-select" class="screen">
+  <div class="menu-bg-anim"></div>
+  <div class="scanlines"></div>
+  <div class="menu-content">
+    <h2 class="screen-title">MODE DE JEU</h2>
+    <div class="mode-grid" id="mode-grid"></div>
+    <div class="drive-mode-block">
+      <h3>TRANSMISSION</h3>
+      <div class="toggle-row">
+        <button class="toggle-btn active" id="btn-auto" onclick="setDriveMode('auto')">🔄 AUTOMATIQUE</button>
+        <button class="toggle-btn" id="btn-manual" onclick="setDriveMode('manual')">🎛 MANUELLE</button>
+      </div>
+    </div>
+    <div class="screen-nav">
+      <button class="btn-menu" onclick="showScreen('screen-car-select')">← RETOUR</button>
+      <button class="btn-menu btn-primary" id="btn-mode-ok" onclick="startGame()">DÉMARRER ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- PARAMÈTRES -->
+<div id="screen-settings" class="screen">
+  <div class="menu-bg-anim"></div>
+  <div class="menu-content">
+    <h2 class="screen-title">PARAMÈTRES</h2>
+    <div class="settings-list">
+      <div class="setting-row">
+        <label>Musique</label>
+        <input type="range" id="set-music" min="0" max="100" value="60" oninput="updateSetting('music',this.value)">
+        <span id="set-music-val">60</span>
+      </div>
+      <div class="setting-row">
+        <label>Effets sonores</label>
+        <input type="range" id="set-sfx" min="0" max="100" value="80" oninput="updateSetting('sfx',this.value)">
+        <span id="set-sfx-val">80</span>
+      </div>
+      <div class="setting-row">
+        <label>Difficulté IA</label>
+        <select id="set-difficulty" onchange="updateSetting('difficulty',this.value)">
+          <option value="easy">Facile</option>
+          <option value="medium" selected>Moyen</option>
+          <option value="hard">Difficile</option>
+          <option value="expert">Expert</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <label>Météo</label>
+        <select id="set-weather" onchange="updateSetting('weather',this.value)">
+          <option value="random">Aléatoire</option>
+          <option value="clear">Ensoleillé</option>
+          <option value="rain">Pluie</option>
+          <option value="fog">Brouillard</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <label>Cycle jour/nuit</label>
+        <input type="checkbox" id="set-daynight" checked onchange="updateSetting('daynight',this.checked)">
+      </div>
+      <div class="setting-row">
+        <label>Caméra par défaut</label>
+        <select id="set-camera" onchange="updateSetting('camera',this.value)">
+          <option value="follow">Vue arrière</option>
+          <option value="cockpit">Cockpit</option>
+          <option value="hood">Capot</option>
+          <option value="free">Libre</option>
+        </select>
+      </div>
+    </div>
+    <div class="screen-nav">
+      <button class="btn-menu" onclick="showScreen('screen-main-menu')">← RETOUR</button>
+      <button class="btn-menu btn-danger" onclick="resetSave()">🗑 RÉINITIALISER</button>
+    </div>
+  </div>
+</div>
+
+<!-- CLASSEMENT -->
+<div id="screen-leaderboard" class="screen">
+  <div class="menu-bg-anim"></div>
+  <div class="menu-content">
+    <h2 class="screen-title">🏆 CLASSEMENT LOCAL</h2>
+    <div class="leaderboard-list" id="leaderboard-list"></div>
+    <div class="screen-nav">
+      <button class="btn-menu" onclick="showScreen('screen-main-menu')">← RETOUR</button>
+    </div>
+  </div>
+</div>
+
+<!-- STATISTIQUES -->
+<div id="screen-stats" class="screen">
+  <div class="menu-bg-anim"></div>
+  <div class="menu-content">
+    <h2 class="screen-title">📊 STATISTIQUES</h2>
+    <div class="stats-grid" id="stats-grid"></div>
+    <div class="achievements-block">
+      <h3>SUCCÈS</h3>
+      <div id="achievements-list"></div>
+    </div>
+    <div class="screen-nav">
+      <button class="btn-menu" onclick="showScreen('screen-main-menu')">← RETOUR</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     JEU
+═══════════════════════════════════════════════ -->
+
+<div id="screen-game" class="screen">
+  <!-- Canvas principal -->
+  <canvas id="game-canvas"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hud">
+    <!-- Haut gauche -->
+    <div class="hud-tl">
+      <div class="hud-position">P<span id="hud-pos">1</span>/<span id="hud-total">4</span></div>
+      <div class="hud-laps">TOUR <span id="hud-lap">1</span>/<span id="hud-maxlap">3</span></div>
+    </div>
+    <!-- Haut centre -->
+    <div class="hud-tc">
+      <div class="hud-timer" id="hud-timer">00:00.000</div>
+      <div class="hud-bestlap">MEILLEUR <span id="hud-best">--:--.---</span></div>
+    </div>
+    <!-- Haut droit -->
+    <div class="hud-tr">
+      <div class="hud-weather" id="hud-weather">☀ SOLEIL</div>
+      <div class="hud-time" id="hud-time">12:00</div>
+    </div>
+    <!-- Minimap -->
+    <div class="hud-minimap-wrap">
+      <canvas id="minimap-canvas" width="160" height="160"></canvas>
+      <div class="minimap-label">MINI-CARTE</div>
+    </div>
+    <!-- Bas gauche : Dégâts + Carburant -->
+    <div class="hud-bl">
+      <div class="hud-bar-row">
+        <span class="bar-icon">🛡</span>
+        <div class="hud-bar"><div class="hud-bar-fill damage-fill" id="hud-damage"></div></div>
+      </div>
+      <div class="hud-bar-row">
+        <span class="bar-icon">⛽</span>
+        <div class="hud-bar"><div class="hud-bar-fill fuel-fill" id="hud-fuel"></div></div>
+      </div>
+      <div class="hud-bar-row">
+        <span class="bar-icon">⚡</span>
+        <div class="hud-bar nitro-bar"><div class="hud-bar-fill nitro-fill" id="hud-nitro"></div></div>
+      </div>
+      <!-- Powerups actifs -->
+      <div class="hud-powerups" id="hud-powerups"></div>
+    </div>
+    <!-- Bas droit : Jauge de vitesse -->
+    <div class="hud-br">
+      <div class="hud-gear" id="hud-gear">1</div>
+      <div class="hud-speedometer">
+        <canvas id="speedo-canvas" width="180" height="180"></canvas>
+        <div class="hud-speed-num"><span id="hud-speed">0</span><span class="hud-speed-unit">km/h</span></div>
+      </div>
+      <div class="hud-rpm-bar-wrap">
+        <div class="hud-rpm-bar" id="hud-rpm-bar"></div>
+        <span class="rpm-label">RPM</span>
+      </div>
+    </div>
+    <!-- Notifications -->
+    <div id="hud-notif" class="hud-notif"></div>
+    <!-- Message central -->
+    <div id="hud-msg" class="hud-msg"></div>
+  </div>
+
+  <!-- PAUSE -->
+  <div id="pause-menu" class="pause-overlay hidden">
+    <div class="pause-box">
+      <h2>⏸ PAUSE</h2>
+      <button class="btn-menu btn-primary" onclick="resumeGame()">▶ REPRENDRE</button>
+      <button class="btn-menu" onclick="restartGame()">🔄 RECOMMENCER</button>
+      <button class="btn-menu" onclick="showScreen('screen-settings')">⚙ PARAMÈTRES</button>
+      <button class="btn-menu btn-danger" onclick="exitToMenu()">🏠 MENU PRINCIPAL</button>
+    </div>
+  </div>
+
+  <!-- Contrôles clavier (mobile hint) -->
+  <div class="controls-hint" id="controls-hint">
+    <span>↑ Accélérer</span><span>↓ Freiner</span><span>← → Tourner</span>
+    <span>ESPACE Nitro</span><span>H Klaxon</span><span>C Caméra</span>
+    <span>P Pause</span><span>L Clignotants</span>
+  </div>
+</div>
+
+<!-- ÉCRAN DE FIN DE COURSE -->
+<div id="screen-race-end" class="screen">
+  <div class="menu-bg-anim"></div>
+  <div class="menu-content">
+    <div id="race-end-content"></div>
+    <div class="screen-nav">
+      <button class="btn-menu btn-primary" onclick="restartGame()">🔄 REJOUER</button>
+      <button class="btn-menu" onclick="exitToMenu()">🏠 MENU PRINCIPAL</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="js/save.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/map.js"></script>
+<script src="js/cars.js"></script>
+<script src="js/physics.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/powerups.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/camera.js"></script>
+<script src="js/hud.js"></script>
+<script src="js/game.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>
